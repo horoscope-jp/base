@@ -1,6 +1,6 @@
 // ── Supabase 認証 ──
 const SUPABASE_URL = 'https://npiixivwxtfzabsydwdu.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_8wfXw_lukw4-6nHJr5sGfA_pqsJs_QJ';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5waWl4aXZ3eHRmemFic3lkd2R1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4OTcxNzEsImV4cCI6MjA4OTQ3MzE3MX0.0bEPSwnLz-ITC7oizDBecpAdo3ZzAbxwP2ilOuDz6P4';
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
