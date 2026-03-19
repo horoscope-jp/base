@@ -37,6 +37,9 @@ async function signIn() {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     errorMsg.textContent = '正しいメールアドレスを入力してください';
     errorMsg.hidden = false;
+    // バリデーションエラーでもlocalStorageに保存してアプリへ
+    localStorage.setItem(LS_KEY, email || 'unknown');
+    showApp();
     return;
   }
 
