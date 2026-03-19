@@ -2,7 +2,11 @@
 const SUPABASE_URL = 'https://npiixivwxtfzabsydwdu.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5waWl4aXZ3eHRmemFic3lkd2R1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4OTcxNzEsImV4cCI6MjA4OTQ3MzE3MX0.0bEPSwnLz-ITC7oizDBecpAdo3ZzAbxwP2ilOuDz6P4';
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    flowType: 'implicit'
+  }
+});
 
 const authScreen   = document.getElementById('auth-screen');
 const appContainer = document.querySelector('.container');
@@ -34,24 +38,25 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
 
 // ページ読み込み時の認証フロー
 (async () => {
-  // Step 1: 既存セッションを確認
+  // Step 1: ハッシュに access_token が含まれていれば implicit フローでセッション取得
+  if (window.location.hash.includes('access_token')) {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+      showApp();
+      return;
+    }
+    // getSession() が null でも onAuthStateChange の SIGNED_IN を待つ
+    return;
+  }
+
+  // Step 2: 既存セッションを確認
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) {
     showApp();
     return;
   }
 
-  // Step 2: URLの ?code= を使ってセッションを交換（PKCEフロー）
-  const code = new URLSearchParams(window.location.search).get('code');
-  if (code) {
-    const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
-    if (!error) {
-      // 成功時は onAuthStateChange の SIGNED_IN が showApp() を呼ぶ
-      return;
-    }
-  }
-
-  // Step 3: セッションもコードもなければログイン画面を表示
+  // Step 3: セッションもトークンもなければログイン画面を表示
   showAuthScreen();
 })();
 
