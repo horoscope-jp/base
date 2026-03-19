@@ -47,12 +47,16 @@ async function signIn() {
   submitBtn.disabled = true;
   submitBtn.textContent = '処理中…';
 
-  // Supabaseへの登録を試みる（失敗してもアプリには遷移する）
+  // Supabaseへの登録を試みる（3秒タイムアウト付き、失敗してもアプリには遷移する）
+  const timeout = new Promise(resolve => setTimeout(resolve, 3000));
   try {
-    await supabaseClient.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: true },
-    });
+    await Promise.race([
+      supabaseClient.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: true },
+      }),
+      timeout,
+    ]);
   } catch (_) {
     // 接続エラーは無視
   }
