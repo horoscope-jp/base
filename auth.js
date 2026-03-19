@@ -17,10 +17,13 @@ function showAuthScreen() {
   appContainer.hidden = true;
 }
 
-// 認証状態の変化を監視
+// 認証状態の変化を監視（マジックリンクコールバック含む）
 supabaseClient.auth.onAuthStateChange((event, session) => {
   if (session) {
-    // 認証済み → アプリを表示
+    // URLのトークンフラグメントを除去してクリーンなURLに戻す
+    if (window.location.hash.includes('access_token')) {
+      history.replaceState(null, '', window.location.pathname);
+    }
     localStorage.setItem('horoscope_authed', '1');
     showApp();
   }
@@ -28,20 +31,18 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
 
 // 初期チェック
 (async function initAuth() {
-  // URLにsupabaseのトークンが含まれているか確認（マジックリンクコールバック）
-  const hashParams = new URLSearchParams(window.location.hash.slice(1));
-  const queryParams = new URLSearchParams(window.location.search);
-  const hasToken = hashParams.get('access_token') || queryParams.get('token') || queryParams.get('code');
+  const hash   = window.location.hash;
+  const search = window.location.search;
 
-  if (hasToken) {
-    // Supabaseがトークンを自動処理するのを待つ
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) {
-      // URLのトークンパラメータを除去してクリーンなURLに戻す
-      history.replaceState(null, '', window.location.pathname);
-      return; // onAuthStateChange が showApp() を呼ぶ
-    }
-  }
+  // URLにトークンがある場合はSupabaseクライアントが自動処理する。
+  // getSession()を呼ぶと処理前でnullが返るため、onAuthStateChangeに完全に委ねる。
+  const hasToken =
+    hash.includes('access_token') ||
+    hash.includes('type=') ||
+    search.includes('code=') ||
+    search.includes('token=');
+
+  if (hasToken) return;
 
   // 既存セッションの確認
   const { data: { session } } = await supabaseClient.auth.getSession();
