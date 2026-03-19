@@ -2,31 +2,16 @@
 const SUPABASE_URL = 'https://npiixivwxtfzabsydwdu.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5waWl4aXZ3eHRmemFic3lkd2R1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4OTcxNzEsImV4cCI6MjA4OTQ3MzE3MX0.0bEPSwnLz-ITC7oizDBecpAdo3ZzAbxwP2ilOuDz6P4';
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: {
-    flowType: 'implicit'
-  }
-});
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const authScreen   = document.getElementById('auth-screen');
 const appContainer = document.querySelector('.container');
-
-// マジックリンクからの遷移かどうか（初期化時に一度だけ評価）
-const hasAuthToken = (() => {
-  const h = window.location.hash;
-  const s = window.location.search;
-  return h.includes('access_token') ||
-         h.includes('type=') ||
-         s.includes('code=') ||
-         s.includes('token=');
-})();
 
 let appShown = false;
 
 function showApp() {
   if (appShown) return;
   appShown = true;
-  // URLに残ったトークン情報を除去
   history.replaceState(null, '', window.location.pathname);
   authScreen.hidden = true;
   appContainer.hidden = false;
@@ -37,9 +22,7 @@ function showAuthScreen() {
   appContainer.hidden = true;
 }
 
-// ── Step 1: onAuthStateChange を最初に登録 ──
-// SIGNED_IN または既存セッション検出でアプリを表示
-// SIGNED_OUT でログイン画面に戻す
+// 認証状態の変化を監視
 supabaseClient.auth.onAuthStateChange((event, session) => {
   if (session) {
     showApp();
@@ -49,25 +32,27 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
   }
 });
 
-// ── Step 2: 初期セッション確認 ──
-// getSession() を呼ぶことで PKCE フローの ?code= 交換を確実にトリガーする
+// ページ読み込み時の認証フロー
 (async () => {
+  // Step 1: 既存セッションを確認
   const { data: { session } } = await supabaseClient.auth.getSession();
-
   if (session) {
-    // 既存セッション or トークン処理済み
     showApp();
-  } else if (!hasAuthToken) {
-    // トークンなし・セッションなし → ログイン画面を表示
-    showAuthScreen();
-  } else {
-    // トークンはあるが getSession() がまだ null
-    // → onAuthStateChange の SIGNED_IN を待つ
-    // 5秒経っても認証が完了しなければログイン画面にフォールバック
-    setTimeout(() => {
-      if (!appShown) showAuthScreen();
-    }, 5000);
+    return;
   }
+
+  // Step 2: URLの ?code= を使ってセッションを交換（PKCEフロー）
+  const code = new URLSearchParams(window.location.search).get('code');
+  if (code) {
+    const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
+    if (!error) {
+      // 成功時は onAuthStateChange の SIGNED_IN が showApp() を呼ぶ
+      return;
+    }
+  }
+
+  // Step 3: セッションもコードもなければログイン画面を表示
+  showAuthScreen();
 })();
 
 // ── メール送信フォーム ──
