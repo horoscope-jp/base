@@ -2,7 +2,7 @@
 const SUPABASE_URL = 'https://npiixivwxtfzabsydwdu.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_8wfXw_lukw4-6nHJr5sGfA_pqsJs_QJ';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const authScreen   = document.getElementById('auth-screen');
 const appContainer = document.querySelector('.container');
@@ -18,7 +18,7 @@ function showAuthScreen() {
 }
 
 // 認証状態の変化を監視
-supabase.auth.onAuthStateChange((event, session) => {
+supabaseClient.auth.onAuthStateChange((event, session) => {
   if (session) {
     // 認証済み → アプリを表示
     localStorage.setItem('horoscope_authed', '1');
@@ -35,7 +35,7 @@ supabase.auth.onAuthStateChange((event, session) => {
 
   if (hasToken) {
     // Supabaseがトークンを自動処理するのを待つ
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
       // URLのトークンパラメータを除去してクリーンなURLに戻す
       history.replaceState(null, '', window.location.pathname);
@@ -44,7 +44,7 @@ supabase.auth.onAuthStateChange((event, session) => {
   }
 
   // 既存セッションの確認
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) {
     showApp();
   } else {
@@ -75,7 +75,7 @@ async function sendMagicLink() {
 
   const redirectTo = window.location.origin + window.location.pathname;
 
-  const { error } = await supabase.auth.signInWithOtp({
+  const { error } = await supabaseClient.auth.signInWithOtp({
     email,
     options: { emailRedirectTo: redirectTo },
   });
