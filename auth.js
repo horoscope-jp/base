@@ -4,12 +4,12 @@ const appContainer = document.querySelector('.container');
 const LS_KEY = 'auth_email';
 
 function showApp() {
-  authScreen.hidden = true;
+  authScreen.style.display = 'none';
   appContainer.hidden = false;
 }
 
 function showAuthScreen() {
-  authScreen.hidden = false;
+  authScreen.style.display = 'flex';
   appContainer.hidden = true;
 }
 
