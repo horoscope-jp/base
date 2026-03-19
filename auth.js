@@ -4,7 +4,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
-    flowType: 'implicit'
+    flowType: 'pkce'
   }
 });
 
@@ -38,25 +38,24 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
 
 // ページ読み込み時の認証フロー
 (async () => {
-  // Step 1: ハッシュに access_token が含まれていれば implicit フローでセッション取得
-  if (window.location.hash.includes('access_token')) {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) {
-      showApp();
-      return;
-    }
-    // getSession() が null でも onAuthStateChange の SIGNED_IN を待つ
-    return;
-  }
-
-  // Step 2: 既存セッションを確認
+  // Step 1: 既存セッションを確認
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) {
     showApp();
     return;
   }
 
-  // Step 3: セッションもトークンもなければログイン画面を表示
+  // Step 2: PKCEフロー — URLの ?code= をセッションに交換
+  const code = new URLSearchParams(window.location.search).get('code');
+  if (code) {
+    const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
+    if (!error) {
+      // 成功時は onAuthStateChange の SIGNED_IN が showApp() を呼ぶ
+      return;
+    }
+  }
+
+  // Step 3: セッションもコードもなければログイン画面を表示
   showAuthScreen();
 })();
 
@@ -81,11 +80,15 @@ async function sendMagicLink() {
   submitBtn.disabled = true;
   submitBtn.textContent = '送信中…';
 
-  const redirectTo = window.location.origin + window.location.pathname;
+  const rawPath = window.location.origin + window.location.pathname;
+  const redirectTo = rawPath.endsWith('/') ? rawPath : rawPath + '/';
 
   const { error } = await supabaseClient.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: redirectTo },
+    options: {
+      emailRedirectTo: redirectTo,
+      shouldCreateUser: true,
+    },
   });
 
   if (error) {
