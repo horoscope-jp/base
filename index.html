@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔮 今日の星座占い ✨</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff69b4">
+
+  <!-- iOS ホーム画面対応 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="星座占い">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔮 今日の星座占い ✨</h1>
+      <p class="date" id="today-date"></p>
+    </header>
+
+    <!-- Page: top -->
+    <section id="page-top" class="page">
+
+      <!-- PWAインストールバナー -->
+      <div id="install-banner" class="install-banner" hidden>
+        <span class="install-banner-icon">📲</span>
+        <span class="install-banner-text" id="install-banner-text">ホーム画面に追加できるよ！</span>
+        <button id="install-btn" class="install-btn">追加する</button>
+        <button id="install-close" class="install-close" aria-label="閉じる">✕</button>
+      </div>
+
+      <!-- iOSインストール手順ポップアップ -->
+      <div id="ios-popup-overlay" class="ios-popup-overlay" hidden></div>
+      <div id="ios-popup" class="ios-popup" hidden>
+        <button id="ios-popup-close" class="ios-popup-close" aria-label="閉じる">✕</button>
+        <p class="ios-popup-title">📲 ホーム画面への追加方法</p>
+        <ul class="ios-steps">
+          <li>
+            <span class="step-num">1</span>
+            <span class="step-body">画面下部の <strong>共有ボタン</strong> をタップ<br><span class="step-sub">「⬆️」のマークのボタンです</span></span>
+          </li>
+          <li>
+            <span class="step-num">2</span>
+            <span class="step-body">メニューをスクロールして<br><strong>「ホーム画面に追加」</strong> をタップ<br><span class="step-sub">「＋」マークのアイコンが目印です</span></span>
+          </li>
+          <li>
+            <span class="step-num">3</span>
+            <span class="step-body">右上の <strong>「追加」</strong> をタップして完了！<br><span class="step-sub">アプリのように起動できるよ🌟</span></span>
+          </li>
+        </ul>
+      </div>
+
+      <p class="label">💫 星座を選んでね 💫</p>
+      <div class="sign-grid" id="sign-grid"></div>
+    </section>
+
+    <!-- Page: 総合運 -->
+    <section id="page-overall" class="page" hidden>
+      <div class="fortune-title-block">
+        <h2 class="fortune-title" id="overall-title"></h2>
+        <p class="lucky-inline">
+          <span>🍀 ラッキーカラー：<span id="lucky-color"></span></span>
+          <span>🔢 ラッキーナンバー：<span id="lucky-number"></span></span>
+        </p>
+      </div>
+      <div class="fortune-card card-overall">
+        <div class="stars" id="stars-overall"></div>
+        <p class="fortune-text" id="text-overall"></p>
+      </div>
+      <div class="nav-buttons">
+        <button class="nav-btn back-btn" id="overall-back">← 戻る</button>
+        <button class="nav-btn next-btn" id="overall-next">次へ →</button>
+      </div>
+    </section>
+
+    <!-- Page: 恋愛運 -->
+    <section id="page-love" class="page" hidden>
+      <div class="fortune-title-block">
+        <h2 class="fortune-title" id="love-title"></h2>
+      </div>
+      <div class="fortune-card card-love">
+        <div class="stars" id="stars-love"></div>
+        <p class="fortune-text" id="text-love"></p>
+      </div>
+      <div class="nav-buttons">
+        <button class="nav-btn back-btn" id="love-back">← 戻る</button>
+        <button class="nav-btn next-btn" id="love-next">次へ →</button>
+      </div>
+    </section>
+
+    <!-- Page: 仕事運 -->
+    <section id="page-work" class="page" hidden>
+      <div class="fortune-title-block">
+        <h2 class="fortune-title" id="work-title"></h2>
+      </div>
+      <div class="fortune-card card-work">
+        <div class="stars" id="stars-work"></div>
+        <p class="fortune-text" id="text-work"></p>
+      </div>
+      <div class="nav-buttons">
+        <button class="nav-btn back-btn" id="work-back">← 戻る</button>
+        <button class="nav-btn next-btn" id="work-next">次へ →</button>
+      </div>
+    </section>
+
+    <!-- Page: 金運 -->
+    <section id="page-money" class="page" hidden>
+      <div class="fortune-title-block">
+        <h2 class="fortune-title" id="money-title"></h2>
+      </div>
+      <div class="fortune-card card-money">
+        <div class="stars" id="stars-money"></div>
+        <p class="fortune-text" id="text-money"></p>
+      </div>
+      <div class="nav-buttons">
+        <button class="nav-btn back-btn" id="money-back">← 戻る</button>
+        <button class="nav-btn next-btn next-btn-top" id="money-next">🏠 トップへ</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js');
+    }
+  </script>
+</body>
+</html>
