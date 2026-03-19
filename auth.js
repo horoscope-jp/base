@@ -38,21 +38,21 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
 
 // ページ読み込み時の認証フロー
 (async () => {
-  // Step 1: 既存セッションを確認
+  // Step 1: URLの ?code= を確認（PKCEフロー）
+  const code = new URLSearchParams(window.location.search).get('code');
+  if (code) {
+    const { data: { session }, error } = await supabaseClient.auth.exchangeCodeForSession(code);
+    if (!error && session) {
+      showApp();
+      return;
+    }
+  }
+
+  // Step 2: 既存セッションを確認
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) {
     showApp();
     return;
-  }
-
-  // Step 2: PKCEフロー — URLの ?code= をセッションに交換
-  const code = new URLSearchParams(window.location.search).get('code');
-  if (code) {
-    const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
-    if (!error) {
-      // 成功時は onAuthStateChange の SIGNED_IN が showApp() を呼ぶ
-      return;
-    }
   }
 
   // Step 3: セッションもコードもなければログイン画面を表示
