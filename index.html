@@ -16,9 +16,42 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png">
 
   <link rel="stylesheet" href="style.css">
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
-  <div class="container">
+  <!-- 認証画面 -->
+  <div id="auth-screen" class="auth-screen" hidden>
+    <div class="auth-card">
+      <h1 class="auth-title">🔮 今日の星座占い ✨</h1>
+      <p class="auth-subtitle">メールアドレスを入力すると<br>ログインリンクをお送りします</p>
+
+      <div id="auth-form-area">
+        <div class="auth-input-wrap">
+          <input
+            type="email"
+            id="auth-email"
+            class="auth-input"
+            placeholder="example@email.com"
+            autocomplete="email"
+          />
+        </div>
+        <button id="auth-submit-btn" class="auth-submit-btn">
+          ✉️ リンクを送る
+        </button>
+        <p id="auth-error" class="auth-error" hidden></p>
+      </div>
+
+      <div id="auth-sent-area" class="auth-sent-area" hidden>
+        <div class="auth-sent-icon">📬</div>
+        <p class="auth-sent-title">メールを送信しました！</p>
+        <p class="auth-sent-desc">届いたメールのリンクをタップすると<br>占いページに入れます✨</p>
+        <button id="auth-resend-btn" class="auth-resend-btn">再送する</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" hidden>
     <header>
       <h1>🔮 今日の星座占い ✨</h1>
       <p class="date" id="today-date"></p>
@@ -125,6 +158,7 @@
     </section>
   </div>
 
+  <script src="auth.js"></script>
   <script src="script.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
